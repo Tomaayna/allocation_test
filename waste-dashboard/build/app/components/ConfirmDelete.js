@@ -1,0 +1,6 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction, AlertDialogOverlay, // ← 追加
+ } from "./ui/alert-dialog";
+export default function ConfirmDelete({ open, targetName, onConfirm, onClose, }) {
+    return (_jsxs(AlertDialog, { open: open, onOpenChange: onClose, children: [_jsx(AlertDialogOverlay, { className: "fixed inset-0 bg-white/80" }), _jsxs(AlertDialogContent, { className: "bg-white text-black", children: [_jsxs(AlertDialogHeader, { children: [_jsx(AlertDialogTitle, { children: "\u672C\u5F53\u306B\u524A\u9664\u3057\u307E\u3059\u304B\uFF1F" }), _jsxs(AlertDialogDescription, { children: ["\u300C", targetName, "\u300D\u3092\u4ECA\u65E5\u306E\u30EB\u30FC\u30C8\u304B\u3089\u524A\u9664\u3057\u307E\u3059\u3002", _jsx("br", {}), "\u3053\u306E\u64CD\u4F5C\u306F\u53D6\u308A\u6D88\u305B\u307E\u305B\u3093\u3002"] })] }), _jsxs(AlertDialogFooter, { children: [_jsx(AlertDialogCancel, { children: "\u30AD\u30E3\u30F3\u30BB\u30EB" }), _jsx(AlertDialogAction, { className: "bg-destructive text-destructive-foreground hover:bg-destructive/90", onClick: onConfirm, children: "\u524A\u9664" })] })] })] }));
+}

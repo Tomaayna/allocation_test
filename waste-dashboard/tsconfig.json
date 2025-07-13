@@ -1,0 +1,35 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" }
+//    { "path": "./tsconfig.node.json" }
+  ],
+
+  // この tsconfig はプロジェクトルート (vite.config.ts と同じ階層) に配置
+  "compilerOptions": {
+    /* === ベース設定 === */
+    "target": "ES2019",
+    "module": "NodeNext",           // Vite/ESM 用
+    "jsx": "react-jsx",           // 新 JSX 変換 (React 18+)
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* === Node 名前空間付きインポート対応 === */
+    "moduleResolution": "NodeNext", // 'node:' プレフィックスを解決
+    "types": ["node"],              // @types/node を常時有効に
+
+    /* === パスエイリアス (任意) === */
+    "baseUrl": "./src",
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"]
+    }
+  },
+
+  /* Vite では src 配下をビルド対象に */
+  "include": ["src"]
+
+}
+

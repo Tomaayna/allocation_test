@@ -1,0 +1,38 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+}
+
+type Group @table {
+  name: String!
+  createdAt: Timestamp!
+  description: String
+  createdBy: User!
+}
+
+type GroupMembership @table(key: ["user", "group"]) {
+  role: String!
+  joinedAt: Timestamp!
+  user: User!
+  group: Group!
+}
+
+type Expense @table {
+  description: String!
+  amount: Float!
+  date: Date!
+  createdAt: Timestamp!
+  notes: String
+  group: Group!
+  paidBy: User!
+}
+
+type Allocation @table(key: ["expense", "member"]) {
+  amountOwed: Float!
+  isSettled: Boolean!
+  createdAt: Timestamp!
+  expense: Expense!
+  member: GroupMembership!
+}
