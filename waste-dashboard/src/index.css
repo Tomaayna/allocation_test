@@ -5,15 +5,20 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --bg      : #ffffff;
+  --fg      : #1f2937;
+  --accent  : #2563eb;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+:root[data-theme="dark-blue"]   { --bg:#1e293b; --fg:#cbd5e1; }
+:root[data-theme="dark-green"]  { --bg:#0f2e20; --fg:#d1fae5; }
+:root[data-theme="dark-purple"] { --bg:#221a35; --fg:#e9d5ff; }
+:root[data-theme="dark-rose"]   { --bg:#2b1820; --fg:#fee2e2; }
 
 a {
   font-weight: 500;

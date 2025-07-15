@@ -52,7 +52,7 @@ export default function Login() {
 
   /* ───────── UI ───────── */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-8">
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader>
           <CardTitle className="text-center text-xl font-bold">

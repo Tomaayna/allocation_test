@@ -2,6 +2,22 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
 
+    /* 共通ヘルパ */
+    function hasRole(roles) {
+      return request.auth != null && request.auth.token.role in roles;
+    }
+
+    /* ───────── settings ───────── */
+    match /settings/{docId} {
+      // 読み込み：viewer 以上
+      allow get, list: if request.auth != null
+                       && (request.auth.token.role in ['viewer','editor','admin']);
+
+      // 書き込み：editor 以上
+      allow create, update: if request.auth != null
+                            && (request.auth.token.role in ['editor','admin']);
+    }
+
     /* routes（親ドキュメント） -------------------------------------- */
     match /routes/{date} {
       // 参照だけなら viewer でも OK
@@ -24,16 +40,17 @@ service cloud.firestore {
       allow write: if request.auth.token.role in ['editor','admin'];
     }
 
+    /* vehicles コレクション */
     match /vehicles/{id} {
-      allow read:  if request.auth != null;
-      allow write: if request.auth.token.role in ['editor','admin'];
+      allow read:   if hasRole(['viewer', 'editor', 'admin']);
+      allow create, update, delete: if hasRole(['editor', 'admin']);
     }
 
     match /staff/{id} {
       allow read:  if request.auth != null;
       allow write: if request.auth.token.role in ['editor','admin'];
     }
-
+    
     /* system コレクションは admin 専用 ------------------------------ */
     match /system/{doc} {
       allow read, write: if request.auth.token.role == 'admin';

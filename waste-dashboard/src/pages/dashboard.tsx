@@ -1,10 +1,12 @@
 "use client";
 import { useMemo, useState, useEffect, useRef } from "react";
 //import dayjs from "dayjs";
-import type { Stop, StopCsvRow } from "./types";
+import type { Stop, StopCsvRow } from "../types";
 import Papa from "papaparse";
 import type  { ParseResult } from "papaparse";
 import { saveAs } from "file-saver";
+import RouteMap from "../components/RouteMap";
+import { useRouteSettings } from "../hooks/useRouteSettings";
 
 
 /* ───────────────── UI libs & Icons */
@@ -13,8 +15,8 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-} from "./components/ui/card";
-import { Button } from "./components/ui/button";
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import {
   MapPin,
   Truck,
@@ -23,14 +25,6 @@ import {
   Trash2,
   RotateCcw,
 } from "lucide-react";
-
-/* ───────────────── Google Map */
-import {
-  GoogleMap,
-  LoadScript,
-  Marker,
-  type GoogleMapProps,
-} from "@react-google-maps/api";
 
 /* ───────────────── Firebase */
 import {
@@ -45,37 +39,23 @@ import {
   setDoc,
   getDocs,
 } from "firebase/firestore";
-import { db } from "./lib/firebase";
+import { db } from "../lib/firebase";
 
 /* ───────────────── hooks & components */
-import { useCustomers } from "./hooks/useCustomers";
-import type { Customer } from "./types";
-import { useVehicles, type Vehicle } from "./hooks/useVehicles";
-import { useStaff, type Staff } from "./hooks/useStaff";
-import NewCustomerModal from "./components/NewCustomerModal";
-import CustomerSelectModal from "./components/CustomerSelectModal";
-import ConfirmDelete from "./components/ConfirmDelete";
+import { useCustomers } from "../hooks/useCustomers";
+import type { Customer } from "../types";
+import { useVehicles, type Vehicle } from "../hooks/useVehicles";
+import { useStaff, type Staff } from "../hooks/useStaff";
+import NewCustomerModal from "../components/NewCustomerModal";
+import CustomerSelectModal from "../components/CustomerSelectModal";
+import ConfirmDelete from "../components/ConfirmDelete";
 import clsx from "clsx";
 import { format } from "date-fns";
 
 /* -------------------------------------------------------------------------- */
 /* Google Map 設定                                                             */
 /* -------------------------------------------------------------------------- */
-const mapStyle: GoogleMapProps["mapContainerStyle"] = { width: "100%", height: "100%" };
 const TOMAKOMAI = { lat: 42.6405, lng: 141.6052 };
-
-/* 地図描画 */
-function RouteMap({ stops, center }: { stops: Stop[]; center: { lat: number; lng: number } }) {
-  return (
-    <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}>
-      <GoogleMap mapContainerStyle={mapStyle} center={center} zoom={11}>
-        {stops.filter(s => s.lat && s.lng).map(s => (
-          <Marker key={s.id} position={{ lat: s.lat!, lng: s.lng! }} />
-        ))}
-      </GoogleMap>
-    </LoadScript>
-  );
-}
 
 /* -------------------------------------------------------------------------- */
 /* サマリーカード                                                               */
@@ -182,7 +162,8 @@ export default function WasteCollectionDashboard() {
   const [showNewModal, setShowNewModal] = useState(false);
 
   /* スタート地点 & ルート生成 */
-  const [startAddress, setStartAddress] = useState("北海道苫小牧市柳町2-2-8");
+  const { settings } = useRouteSettings(); 
+  const startAddress = settings.startAddress;       // 読み取り専用
   const [startLatLng, setStartLatLng] = useState<{ lat: number; lng: number } | null>(null);
   const [generating, setGenerating] = useState(false);
 
@@ -438,15 +419,9 @@ export default function WasteCollectionDashboard() {
           <Card>
             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex-1 flex flex-col gap-2">
-                <input className="border rounded px-2 py-1 text-sm w-full"
-                  value={startAddress} onChange={e=>setStartAddress(e.target.value)}
-                  placeholder="スタート地点…" />
-                <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" onClick={geocodeStart}>位置更新</Button>
                   <Button size="sm" variant="secondary" onClick={()=>setShowSelectModal(true)}>
                     <Plus className="w-4 h-4 mr-1"/>顧客追加
                   </Button>
-                </div>
                 <Button size="sm" disabled={generating||stops.length<2} onClick={generateRoute}>
                 {generating && <RotateCcw className="w-4 h-4 mr-1 animate-spin"/>}
                 ルート生成
@@ -530,7 +505,7 @@ export default function WasteCollectionDashboard() {
           {/* スタッフ */}
           <Card className="max-h-[350px] overflow-y-auto pr-1">
             <CardHeader>
-              <CardTitle>スタッフ出勤状況</CardTitle>
+              <CardTitle>社員出勤状況</CardTitle>
               <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-3">
                 <input className="border rounded px-2 py-1 flex-1" placeholder="名前検索…"
                   value={queryStaff} onChange={e=>setQueryStaff(e.target.value)}/>

@@ -1,6 +1,12 @@
 // src/AppShell.tsx
 import { Outlet, NavLink } from "react-router-dom";
-import { Home, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Settings as SettingsIcon,
+  Truck,
+  Users,
+  Boxes,
+} from "lucide-react";
 
 export default function AppShell() {
   return (
@@ -11,13 +17,28 @@ export default function AppShell() {
           配車システム
         </h2>
 
-        <nav className="flex-1 px-2 space-y-1">
-          <Nav to="/" icon={<Home />} label="ダッシュボード" />
-          <Nav to="/settings" icon={<Settings />} label="設定" />
+        {/* ── メインメニュー ── */}
+        <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
+
+          {/* Dashboard */}
+          <NavItem to="/" icon={<LayoutDashboard className="w-4 h-4" />} label="ダッシュボード" exact />
+
+          {/* Masters （Accordion または単純リンク） */}
+          <p className="px-3 mt-4 mb-1 text-xs text-gray-400">マスタ</p>
+          <NavItem to="/masters/vehicles"  icon={<Truck className="w-4 h-4" />} label="車両マスタ" />
+          <NavItem to="/masters/staff"     icon={<Users className="w-4 h-4" />} label="社員マスタ" />
+          <NavItem to="/masters/customers" icon={<Boxes className="w-4 h-4" />} label="顧客マスタ" />
+
+          {/* Settings */}
+          <p className="px-3 mt-4 mb-1 text-xs text-gray-400">設定</p>
+          <NavItem to="/settings/notifications" icon={<SettingsIcon className="w-4 h-4" />} label="通知設定" />
+          <NavItem to="/settings/route-params"   icon={<SettingsIcon className="w-4 h-4" />} label="ルート生成" />
+          <NavItem to="/settings/data-io"        icon={<SettingsIcon className="w-4 h-4" />} label="データ入出力" />
+          <NavItem to="/settings/theme"          icon={<SettingsIcon className="w-4 h-4" />} label="テーマ" />
         </nav>
       </aside>
 
-      {/* ─ 右側にページ差し込み ─ */}
+      {/* 右側：ページ */}
       <main className="flex-1 overflow-auto bg-gray-50">
         <Outlet />
       </main>
@@ -25,19 +46,22 @@ export default function AppShell() {
   );
 }
 
-function Nav({
+/* NavItem 共通化 */
+function NavItem({
   to,
   icon,
   label,
+  exact = false,
 }: {
   to: string;
   icon: React.ReactNode;
   label: string;
+  exact?: boolean;
 }) {
   return (
     <NavLink
       to={to}
-      end
+      end={exact}
       className={({ isActive }) =>
         [
           "flex items-center gap-2 px-3 py-2 rounded text-sm font-medium",
