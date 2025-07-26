@@ -1,18 +1,14 @@
 // src/App.tsx
 import { useContext } from "react";
-import { Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import { AuthCtx } from "./contexts/AuthContext";
 
 import Login      from "./login";
 import AppShell   from "./AppShell";        // 左メニュー付きレイアウト
 import Dashboard    from "./pages/dashboard";
-import VehicleMaster   from "./pages/masters/VehicleMaster";
-import StaffMaster     from "./pages/masters/StaffMaster";
-import CustomerMaster  from "./pages/masters/CustomerMaster";
-import NotificationSetting from "./pages/settings/NotificationSetting";
-import RouteParamSetting   from "./pages/settings/RouteParamSetting";
-import DataIOSetting       from "./pages/settings/DataIOSetting";
-import ThemeSetting        from "./pages/settings/ThemeSetting";
+import CarInfo    from "./pages/CarInfo";
+import CarInfoShell   from "./pages/CarInfoShell";
+import HomeMenu   from "./pages/HomeMenu";
 //import Settings   from "./Settings";        // ←プレースホルダで OK
 // ほか masters など …
 
@@ -29,22 +25,17 @@ export default function App() {
   /* signedIn */
   return (
     <Routes>
-      {/* レイアウト Route に AppShell を噛ませる */}
+      {/* ─ メインメニュー ─ */}
+      <Route path="/" element={<HomeMenu />} />
+
+      {/* ─ 配車システム（既存 AppShell を流用） ─ */}
       <Route element={<AppShell />}>
-        <Route index element={<Dashboard />} />
-        {/* ----- マスタ ----- */}
-        <Route path="masters">
-          <Route path="vehicles"   element={<VehicleMaster />} />
-          <Route path="staff"      element={<StaffMaster />} />
-          <Route path="customers"  element={<CustomerMaster />} />
-        </Route>
-        <Route path="settings" >
-        {/* masters などもここに追加 */}
-          <Route path="notifications" element={<NotificationSetting />} />
-          <Route path="route-params"   element={<RouteParamSetting />} />
-          <Route path="data-io"        element={<DataIOSetting />} />
-          <Route path="theme"          element={<ThemeSetting />} />
-        </Route>
+        <Route path="dashboard" element={<Dashboard />} />
+      </Route>
+
+      {/* ─ 車両台帳（独自サイドメニュー） ─ */}
+      <Route element={<CarInfoShell />}>
+        <Route path="carinfo" element={<CarInfo />} />
       </Route>
     </Routes>
   );

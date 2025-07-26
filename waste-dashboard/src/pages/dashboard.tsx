@@ -5,7 +5,6 @@ import type { Stop, StopCsvRow } from "../types";
 import Papa from "papaparse";
 import type  { ParseResult } from "papaparse";
 import { saveAs } from "file-saver";
-import RouteMap from "../components/RouteMap";
 import { useRouteSettings } from "../hooks/useRouteSettings";
 
 
@@ -51,11 +50,6 @@ import CustomerSelectModal from "../components/CustomerSelectModal";
 import ConfirmDelete from "../components/ConfirmDelete";
 import clsx from "clsx";
 import { format } from "date-fns";
-
-/* -------------------------------------------------------------------------- */
-/* Google Map 設定                                                             */
-/* -------------------------------------------------------------------------- */
-const TOMAKOMAI = { lat: 42.6405, lng: 141.6052 };
 
 /* -------------------------------------------------------------------------- */
 /* サマリーカード                                                               */
@@ -415,6 +409,75 @@ export default function WasteCollectionDashboard() {
         {/* 左 3 */}
         <div className="xl:col-span-3 flex flex-col gap-6">
 
+          {/* スタッフ */}
+          <Card className="max-h-[350px] overflow-y-auto pr-1">
+            <CardHeader>
+              <CardTitle>社員出勤状況</CardTitle>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-3">
+                <input className="border rounded px-2 py-1 flex-1" placeholder="名前検索…"
+                  value={queryStaff} onChange={e=>setQueryStaff(e.target.value)}/>
+                <select className="border rounded px-2 py-1 w-full sm:w-36"
+                  value={deptStaff} onChange={e=>setDeptStaff(e.target.value)}>
+                  <option value="">部署すべて</option>
+                  {departments.map(d=><option key={d}>{d}</option>)}
+                </select>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {filteredStaff.map(m=>(
+                <div key={m.id} className="flex items-start gap-2">
+                  <span className="flex-1 text-sm">{m.name}</span>
+                  <div className="flex gap-1 flex-wrap max-w-[40%]">
+                    {(m.license??[]).map(lic=>(
+                      <span key={lic} className="text-[10px] bg-purple-200 px-1 rounded whitespace-nowrap">{lic}</span>
+                    ))}
+                  </div>
+                  <select value={m.status} onChange={e=>updateStaffStatus(m.id,e.target.value as Staff["status"])}
+                    className={clsx("text-xs px-2 py-0.5 rounded-full border",{
+                      "bg-green-100 text-green-700":m.status==="出勤",
+                      "bg-red-100 text-red-700":m.status==="休暇",
+                    })}>
+                    <option>出勤</option><option>休暇</option>
+                  </select>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          {/* 車両ステータス */}
+          <Card className="overflow-hidden">
+            <CardHeader><CardTitle>車両ステータス</CardTitle></CardHeader>
+            <CardContent className="pt-2">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-3">
+                <input className="border rounded px-2 py-1 flex-1" placeholder="名前検索…"
+                  value={queryVehicle} onChange={e=>setQueryVehicle(e.target.value)}/>
+                <select className="border rounded px-2 py-1 w-full sm:w-36"
+                  value={deptVehicle} onChange={e=>setDeptVehicle(e.target.value)}>
+                  <option value="">全部署</option>
+                  {departments.map(d=><option key={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                {filteredVehicles.map(v=>(
+                  <div key={v.id} className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-muted-foreground"/>
+                    <span className="flex-1 text-sm">{v.name}</span>
+                    <select value={v.status} onChange={e=>updateStatus(v.id, e.target.value as Vehicle["status"])}
+                      className={clsx("text-xs px-2 py-0.5 rounded-full border",{
+                        "bg-green-100 text-green-700":v.status==="出庫中",
+                        "bg-gray-100 text-gray-600":v.status==="入庫中",
+                        "bg-yellow-100 text-yellow-700":v.status==="修理・点検",
+                      })}>
+                      <option>出庫中</option><option>入庫中</option><option>修理・点検</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 中央 6 */}
+        <div className="xl:col-span-6 flex flex-col gap-6">
           {/* ルート */}
           <Card>
             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -452,86 +515,6 @@ export default function WasteCollectionDashboard() {
                     <Button size="icon" variant="secondary" onClick={()=>setEditingStop(stop)}><Plus className="w-4 h-4"/></Button>
                     <Button size="icon" variant="ghost" className="text-destructive" onClick={()=>setDeleting(stop)}><Trash2 className="w-4 h-4"/></Button>
                   </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* 車両ステータス */}
-          <Card className="overflow-hidden">
-            <CardHeader><CardTitle>車両ステータス</CardTitle></CardHeader>
-            <CardContent className="pt-2">
-              <div className="flex flex-col sm:flex-row flex-wrap gap-2 mb-3">
-                <input className="border rounded px-2 py-1 flex-1" placeholder="名前検索…"
-                  value={queryVehicle} onChange={e=>setQueryVehicle(e.target.value)}/>
-                <select className="border rounded px-2 py-1 w-full sm:w-36"
-                  value={deptVehicle} onChange={e=>setDeptVehicle(e.target.value)}>
-                  <option value="">全部署</option>
-                  {departments.map(d=><option key={d}>{d}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-                {filteredVehicles.map(v=>(
-                  <div key={v.id} className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-muted-foreground"/>
-                    <span className="flex-1 text-sm">{v.name}</span>
-                    <select value={v.status} onChange={e=>updateStatus(v.id, e.target.value as Vehicle["status"])}
-                      className={clsx("text-xs px-2 py-0.5 rounded-full border",{
-                        "bg-green-100 text-green-700":v.status==="出庫中",
-                        "bg-gray-100 text-gray-600":v.status==="入庫中",
-                        "bg-yellow-100 text-yellow-700":v.status==="修理・点検",
-                      })}>
-                      <option>出庫中</option><option>入庫中</option><option>修理・点検</option>
-                    </select>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 中央 6 */}
-        <div className="xl:col-span-6 flex flex-col gap-6">
-          <Card className="min-h-[350px] w-full">
-            <CardHeader><CardTitle>ルートマップ</CardTitle></CardHeader>
-            <CardContent className="h-[300px] w-full">
-              <RouteMap stops={stops} center={startLatLng ?? TOMAKOMAI}/>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 右 3 */}
-        <div className="xl:col-span-3 flex flex-col gap-6">
-          {/* スタッフ */}
-          <Card className="max-h-[350px] overflow-y-auto pr-1">
-            <CardHeader>
-              <CardTitle>社員出勤状況</CardTitle>
-              <div className="flex flex-col sm:flex-row flex-wrap gap-2 mt-3">
-                <input className="border rounded px-2 py-1 flex-1" placeholder="名前検索…"
-                  value={queryStaff} onChange={e=>setQueryStaff(e.target.value)}/>
-                <select className="border rounded px-2 py-1 w-full sm:w-36"
-                  value={deptStaff} onChange={e=>setDeptStaff(e.target.value)}>
-                  <option value="">部署すべて</option>
-                  {departments.map(d=><option key={d}>{d}</option>)}
-                </select>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {filteredStaff.map(m=>(
-                <div key={m.id} className="flex items-start gap-2">
-                  <span className="flex-1 text-sm">{m.name}</span>
-                  <div className="flex gap-1 flex-wrap max-w-[40%]">
-                    {(m.license??[]).map(lic=>(
-                      <span key={lic} className="text-[10px] bg-purple-200 px-1 rounded whitespace-nowrap">{lic}</span>
-                    ))}
-                  </div>
-                  <select value={m.status} onChange={e=>updateStaffStatus(m.id,e.target.value as Staff["status"])}
-                    className={clsx("text-xs px-2 py-0.5 rounded-full border",{
-                      "bg-green-100 text-green-700":m.status==="出勤",
-                      "bg-red-100 text-red-700":m.status==="休暇",
-                    })}>
-                    <option>出勤</option><option>休暇</option>
-                  </select>
                 </div>
               ))}
             </CardContent>

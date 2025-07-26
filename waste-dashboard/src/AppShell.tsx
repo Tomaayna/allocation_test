@@ -6,6 +6,7 @@ import {
   Truck,
   Users,
   Boxes,
+  Home,
 } from "lucide-react";
 
 export default function AppShell() {
@@ -20,6 +21,7 @@ export default function AppShell() {
         {/* ── メインメニュー ── */}
         <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
 
+          <NavItem to="/" icon={<Home />} label="メニュー" exact />
           {/* Dashboard */}
           <NavItem to="/" icon={<LayoutDashboard className="w-4 h-4" />} label="ダッシュボード" exact />
 
